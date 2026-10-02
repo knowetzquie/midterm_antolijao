@@ -1,0 +1,32 @@
+1. Explain the difference between PUT and PATCH. One AeroPay situation where each is the right method.
+    - PUT replaces all the mutable fields, so I must send the complete set because the card say version and owner are required,
+    whereas PATCH changes only the specific fields I send, making PATCH the ideal method for an AeroPay situation like flipping
+    a service's status to maintenance which is exactly what my B4a does while PUT is the correct choice for re-registering a 
+    service with a full new configuration
+
+2. Why does idempotency matter when syncing a config file into a registry, and how did your sync_registry.py
+ensure it?
+    - Idempotency matters when syncing because running the sync process the multiple times should leave the exact same final result 
+    without creating any duplicate records or breaking into errors, and my sync_registry.py script ensures this behavior by fetching 
+    the list of already registered names first so that it can dynamically choose to send a PATCH request if the service name already 
+    exists or a POST request if it does not, which you can confidently back up with your own test data showing that the first execution
+    resulted in 10 items created while the second execution resulted in 0 items created and 10 items updated.
+
+3. For storing service config, give one strength and one weakness of each: JSON, YAML, XML.
+    -When comparing data formats for storing service configurations, JSON is widely supported and stands as the default standard for 
+    REST APIs but suffers from a lack of native comment support, whereas YAML is incredibly easy for humans to read and write due to 
+    its clean syntax but remains highly sensitive to exact indentation spacing, and XML provides a robust, strict structure utilizing 
+    detailed attributes but is notoriously verbose and heavy to parse.
+    
+4. The registry replies 401, then 404, then 500. What does each mean, and what would you check first for each?
+    -If the registry replies with a 401 Unauthorized error it means the request is not properly authenticated so I should first check
+    my API key and the X-API-Key header, while a 404 Not Found error means the resource I requested does not exist requiring me to first 
+    verify the specific ID name, and URL string, and a 500 Internal Server Error indicated that  the server itself failed and the issue
+    does not lie within my request format so I should check the server logs or simply retry the request later, with my error_demo.py 
+    console output already proving the occurrence of the first two codes as direct evidence.
+
+5. Why is a local mock API (like this one) useful during development, and one thing a mock cannot verify?
+    -A local mock API is incredibly useful during software development because it provides a completely safe, offline, and resettable 
+    testing environment using the --reset flag without putting any real production credentials or user data at risk, yet a mock 
+    environment inherently cannot verify real-world behavior such as production network latency, live rate-limiting policies, actual 
+    authentication server handshakes, or handling massive real-world data volumes.
